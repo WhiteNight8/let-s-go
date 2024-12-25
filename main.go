@@ -20,6 +20,14 @@ func homeView(w http.ResponseWriter, r *http.Request) {
 }
 
 func homeCreate(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method != http.MethodPost {
+		w.Header().Set("Allow", http.MethodPost)
+
+		http.Error(w, "Method Not Allowed", 405)
+		return
+	}
+
 	w.Write([]byte("create a specific view"))
 }
 
