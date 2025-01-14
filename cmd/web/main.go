@@ -4,13 +4,18 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"os"
 )
 
 func main() {
 
-	addr := flag.String("addr", "4000", "http network address")
+	addr := flag.String("addr", ":4000", "http network address")
 
 	flag.Parse()
+
+	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
+
+	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
 	mux := http.NewServeMux()
 
@@ -22,7 +27,13 @@ func main() {
 	mux.HandleFunc("/home/view", homeView)
 	mux.HandleFunc("/home/create", homeCreate)
 
-	log.Print("starting server on 4000")
-	err := http.ListenAndServe(*addr, mux)
-	log.Fatal(err)
+	srv := &http.Server{
+		Addr:     *addr,
+		ErrorLog: errorLog,
+		Handler:  mux,
+	}
+
+	infoLog.Printf("starting server on %s", *addr)
+	err := srv.ListenAndServe()
+	errorLog.Fatal(err)
 }
