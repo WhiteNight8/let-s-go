@@ -7,6 +7,11 @@ import (
 	"os"
 )
 
+type application struct {
+	errorLog *log.Logger
+	infoLog  *log.Logger
+}
+
 func main() {
 
 	addr := flag.String("addr", ":4000", "http network address")
@@ -17,15 +22,20 @@ func main() {
 
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
+	app := &application{
+		errorLog: errorLog,
+		infoLog:  infoLog,
+	}
+
 	mux := http.NewServeMux()
 
 	fileServer := http.FileServer(http.Dir("./ui/static"))
 
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
 
-	mux.HandleFunc("/", home)
-	mux.HandleFunc("/home/view", homeView)
-	mux.HandleFunc("/home/create", homeCreate)
+	mux.HandleFunc("/", app.home)
+	mux.HandleFunc("/home/view", app.homeView)
+	mux.HandleFunc("/home/create", app.homeCreate)
 
 	srv := &http.Server{
 		Addr:     *addr,
